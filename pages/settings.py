@@ -1,6 +1,6 @@
 import streamlit as st
 from login import check_login  # Import the login function from login.py
-from pages.add_game import add_game  # Import the Add Game page for adding/updating games
+from pages.change_database.change_database import change_database  # Import the Add Game page for adding/updating games
 
 
 def settings():
@@ -11,9 +11,9 @@ def settings():
         if check_login():  # Check if the developer logs in
             st.session_state["logged_in"] = True  # Set session state to logged in
             st.success("You are logged in!")
-            add_game()  # Redirect to the Add Game page
+            change_database()  # Redirect to the Add Game page
         else:
             st.warning("Please log in to add or update games.")
     else:
         # If logged in, go directly to the Add Game page
-        add_game()
+        change_database()

@@ -3,6 +3,7 @@ from login import check_login  # Import the login function
 from pages.view_games import view_games  # Import view games page
 from pages.settings import settings  # Import settings page (for adding/updating games)
 from pages.about import about  # Import about page
+from utils.helpers import custom_header
 
 # Page configuration
 st.set_page_config(page_title="GameBase", page_icon="🎮", layout="wide")
@@ -12,7 +13,7 @@ col1, col2 = st.columns([3, 1])
 
 # Left column for the title
 with col1:
-    st.title("🎮 GameBase")
+    custom_header("GameBase")
 
 # Right column for the "More" dropdown
 with col2:
