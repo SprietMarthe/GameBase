@@ -1,66 +1,118 @@
-import altair as alt
-import pandas as pd
 import streamlit as st
+from firebase_config import get_firestore_db
 
-# Show the page title and description.
-st.set_page_config(page_title="Movies dataset", page_icon="🎬")
-st.title("🎬 Movies dataset")
+# Page configuration
+st.set_page_config(page_title="Games Database", page_icon="🎮")
+st.title("🎮 Games Database")
 st.write(
     """
-    This app visualizes data from [The Movie Database (TMDB)](https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata).
-    It shows which movie genre performed best at the box office over the years. Just 
-    click on the widgets below to explore!
+    Find the perfect game for your next gathering! Browse our collection of games
+    and discover new favorites.
     """
 )
 
+# Function to fetch games from Firestore
+@st.cache_data(ttl=300)  # Cache for 5 minutes
+def load_games():
+    """Fetch games from Firestore database"""
+    try:
+        db = get_firestore_db()
+        games_ref = db.collection("games")
+        games_docs = games_ref.stream()
+        
+        games = []
+        for doc in games_docs:
+            game_data = doc.to_dict()
+            game_data['id'] = doc.id  # Add the document ID as a field
+            games.append(game_data)
+            
+        return games
+    except Exception as e:
+        st.error(f"Error loading games: {e}")
+        return []
 
-# Load the data from a CSV. We're caching this so it doesn't reload every time the app
-# reruns (e.g. if the user interacts with the widgets).
-@st.cache_data
-def load_data():
-    df = pd.read_csv("data/movies_genres_summary.csv")
-    return df
+# Load games
+with st.spinner("Loading games..."):
+    games = load_games()
 
+# Display basic games list
+if games:
+    st.subheader(f"All Games ({len(games)})")
+    
+    # Create three columns for the games list
+    cols = st.columns(3)
+    
+    # Display games in a grid with basic info
+    for i, game in enumerate(games):
+        with cols[i % 3]:
+            with st.container(border=True):
+                st.subheader(game.get('game_name', 'Unnamed Game'))
+                st.caption(f"Type: {game.get('game_type', 'Not specified')}")
+                
+                # Game details button
+                if st.button("View Details", key=f"view_{game.get('id')}", use_container_width=True):
+                    st.session_state['selected_game'] = game.get('id')
+else:
+    st.info("No games found. Please add games to your Firebase database.")
+    
+    # Add a helpful message about setting up sample data
+    with st.expander("Need help setting up sample data?"):
+        st.markdown("""
+        ### Sample Firebase Data Structure:
+        
+        Create a collection called `games` with documents containing these fields:
+        
+        ```
+        game_name: "Uno"
+        game_type: "Card"
+        difficulty: "Easy"
+        number_of_players: "2-10"
+        age_range: "6+"
+        duration: "30 min"
+        materials: "UNO cards"
+        game_explanation: "Match cards by color or number"
+        ```
+        """)
 
-df = load_data()
-
-# Show a multiselect widget with the genres using `st.multiselect`.
-genres = st.multiselect(
-    "Genres",
-    df.genre.unique(),
-    ["Action", "Adventure", "Biography", "Comedy", "Drama", "Horror"],
-)
-
-# Show a slider widget with the years using `st.slider`.
-years = st.slider("Years", 1986, 2006, (2000, 2016))
-
-# Filter the dataframe based on the widget input and reshape it.
-df_filtered = df[(df["genre"].isin(genres)) & (df["year"].between(years[0], years[1]))]
-df_reshaped = df_filtered.pivot_table(
-    index="year", columns="genre", values="gross", aggfunc="sum", fill_value=0
-)
-df_reshaped = df_reshaped.sort_values(by="year", ascending=False)
-
-
-# Display the data as a table using `st.dataframe`.
-st.dataframe(
-    df_reshaped,
-    use_container_width=True,
-    column_config={"year": st.column_config.TextColumn("Year")},
-)
-
-# Display the data as an Altair chart using `st.altair_chart`.
-df_chart = pd.melt(
-    df_reshaped.reset_index(), id_vars="year", var_name="genre", value_name="gross"
-)
-chart = (
-    alt.Chart(df_chart)
-    .mark_line()
-    .encode(
-        x=alt.X("year:N", title="Year"),
-        y=alt.Y("gross:Q", title="Gross earnings ($)"),
-        color="genre:N",
-    )
-    .properties(height=320)
-)
-st.altair_chart(chart, use_container_width=True)
+# Game detail view
+if 'selected_game' in st.session_state:
+    game_id = st.session_state['selected_game']
+    selected_game = next((g for g in games if g.get('id') == game_id), None)
+    
+    if selected_game:
+        with st.container(border=True):
+            st.header(selected_game.get('game_name', 'Unnamed Game'))
+            
+            # Game information in two columns
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader("Basic Info")
+                st.write(f"**Type:** {selected_game.get('game_type', 'Not specified')}")
+                st.write(f"**Difficulty:** {selected_game.get('difficulty', 'Not specified')}")
+                st.write(f"**Players:** {selected_game.get('number_of_players', 'Not specified')}")
+                st.write(f"**Age Range:** {selected_game.get('age_range', 'Not specified')}")
+                st.write(f"**Duration:** {selected_game.get('duration', 'Not specified')}")
+            
+            with col2:
+                st.subheader("Materials")
+                st.write(selected_game.get('materials', 'Not specified'))
+            
+            # Game explanation
+            st.subheader("Game Explanation")
+            st.write(selected_game.get('game_explanation', 'No explanation provided.'))
+            
+            # Rules (if available)
+            if 'rules' in selected_game and selected_game['rules']:
+                st.subheader("Rules")
+                st.write(selected_game['rules'])
+            
+            # Score calculation (if available)
+            if 'score_calculation' in selected_game and selected_game['score_calculation']:
+                st.subheader("Score Calculation")
+                st.write(selected_game['score_calculation'])
+            
+            # Close button
+            if st.button("Close Details", use_container_width=True):
+                del st.session_state['selected_game']
+                st.rerun()

@@ -17,3 +17,22 @@ A simple Streamlit app showing movie data from [The Movie Database (TMDB)](https
    ```
    $ streamlit run streamlit_app.py
    ```
+
+### Structure
+games-database/                  # Root project directory
+│
+├── streamlit_app.py            # Main Streamlit application file (replaces your current file)
+├── firebase_config.py          # Firebase configuration and connection utilities
+├── seed_data.py                # Optional utility to seed your database with sample data
+│
+├── .streamlit/                 # Streamlit configuration directory
+│   └── secrets.toml            # Secret configuration for Firebase (do not commit this)
+│
+├── .devcontainer/              # Development container configuration (already exists)
+│   └── devcontainer.json       # VS Code development container settings
+│
+├── data/                       # Data directory (you can keep this for any local data)
+│   └── placeholder.md          # You can keep this as a placeholder
+│
+├── .gitignore                  # Git ignore file to exclude sensitive files
+└── requirements.txt            # Project dependencies (update this)
