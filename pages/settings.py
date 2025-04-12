@@ -1,6 +1,6 @@
 import streamlit as st
 from login import check_login  # Import the login function from login.py
-from pages.change_database.change_database import change_database  # Import the Add Game page for adding/updating games
+from pages.change_database.database_manager import change_database
 
 
 def settings():

@@ -47,7 +47,37 @@ def edit_game():
                 
                 # Basic game information
                 new_game_name = st.text_input("Game Name", game.get('game_name', ''))
-                new_game_type = st.text_input("Game Type", game.get('game_type', ''))
+
+                # Determine the current game type and if it's a custom "Other" type
+                game_types_data = load_game_types()
+                game_type_options = [gt['name'] for gt in game_types_data]
+                current_type = game.get('game_type', '')
+                is_other_type = not any(current_type == option for option in game_type_options)
+                other_type_value = ""
+
+                if is_other_type:
+                    # Extract the custom type if it starts with "Other: "
+                    if current_type.startswith("Other: "):
+                        other_type_value = current_type[7:]  # Remove the "Other: " prefix
+                    selected_index = game_type_options.index("Other")
+                else:
+                    # Find the index of the matching game type
+                    selected_index = game_type_options.index(current_type) if current_type in game_type_options else 0
+
+                # Display the game type dropdown
+                new_game_type = st.selectbox("Game Type", 
+                                        game_type_options,
+                                        index=selected_index)
+
+                # Show a text input if "Other" is selected
+                if new_game_type == "Other":
+                    other_type = st.text_input("Please specify game type", value=other_type_value)
+                    if other_type:
+                        new_game_type = f"Other: {other_type}"
+
+
+
+
                 new_difficulty = st.selectbox("Difficulty", 
                                             ["Easy", "Medium", "Hard"],
                                             index=["Easy", "Medium", "Hard"].index(game.get('difficulty', 'Medium')) 

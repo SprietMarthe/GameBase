@@ -1,5 +1,6 @@
 import streamlit as st
 from firebase_config import get_firestore_db
+from game_types import load_game_types
 
 def add_game():
     """Form for adding a new game to the database"""
@@ -13,7 +14,12 @@ def add_game():
     with st.form("add_game_form"):
         # Basic game information
         game_name = st.text_input("Game Name*", help="Required")
-        game_type = st.text_input("Game Type*", help="E.g., Card, Board, Team, etc.")
+
+        game_types_data = load_game_types()
+        game_type_options = [gt['name'] for gt in game_types_data]
+        game_type = st.selectbox("Game Type*", game_type_options, help="Select the type of game")
+
+
         difficulty = st.selectbox("Difficulty*", ["Easy", "Medium", "Hard"])
         
         # Player information

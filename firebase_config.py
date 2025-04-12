@@ -17,7 +17,7 @@ def get_firebase_app():
         if firebase_key:
             try:
                 json.loads(firebase_key)
-                print("Valid JSON format!")
+                # print("Valid JSON format!")
             except json.JSONDecodeError as e:
                 print(f"Error parsing JSON: {e}")
             try:
