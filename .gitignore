@@ -47,7 +47,3 @@ ENV/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-
-# Firebase
-firebase-key.json
