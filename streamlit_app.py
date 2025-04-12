@@ -1,8 +1,8 @@
 import streamlit as st
-from firebase_config import get_firestore_db
+from load_data import load_games  # Import the load_games function from the new file
 
-# Page configuration
-st.set_page_config(page_title="Games Database", page_icon="🎮")
+# Set page configuration with title and icon
+st.set_page_config(page_title="Games Database", page_icon="🎮", layout="wide")
 st.title("🎮 Games Database")
 st.write(
     """
@@ -11,29 +11,13 @@ st.write(
     """
 )
 
-# Function to fetch games from Firestore
-@st.cache_data(ttl=300)  # Cache for 5 minutes
-def load_games():
-    """Fetch games from Firestore database"""
-    try:
-        db = get_firestore_db()
-        games_ref = db.collection("games")
-        games_docs = games_ref.stream()
-        
-        games = []
-        for doc in games_docs:
-            game_data = doc.to_dict()
-            game_data['id'] = doc.id  # Add the document ID as a field
-            games.append(game_data)
-            
-        return games
-    except Exception as e:
-        st.error(f"Error loading games: {e}")
-        return []
-
-# Load games
+# Load games (from Firebase or CSV)
 with st.spinner("Loading games..."):
     games = load_games()
+
+# Display message only if Firebase is not initialized
+if 'firebase_initialized' in st.session_state and not st.session_state['firebase_initialized']:
+    st.warning("Failed to initialize Firebase. Showing demo data instead.")
 
 # Display basic games list
 if games:
