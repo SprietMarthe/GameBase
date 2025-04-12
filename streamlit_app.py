@@ -8,6 +8,10 @@ from utils.helpers import custom_header
 # Page configuration
 st.set_page_config(page_title="GameBase", page_icon="🎮", layout="wide")
 
+# Initialize the session state for page navigation
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "View Games"
+
 # Create two columns: one for the title and the other for the "More" dropdown
 col1, col2 = st.columns([3, 1])
 
@@ -17,9 +21,20 @@ with col1:
 
 # Right column for the "More" dropdown
 with col2:
-    menu = st.selectbox("More", options=["View Games", "Settings", "About"], key="more_menu")
+    # Use the session state to remember the current page
+    menu = st.selectbox(
+        "More", 
+        options=["View Games", "Settings", "About"], 
+        index=["View Games", "Settings", "About"].index(st.session_state.current_page),
+        key="more_menu"
+    )
+    
+    # Update the current page in session state when changed
+    if menu != st.session_state.current_page:
+        st.session_state.current_page = menu
+        # Don't use st.rerun() here as it would create an infinite loop
 
-# Handle the "Log In" menu option
+# Handle navigation based on the selected menu
 if menu == "Settings":
     settings()  # Call the settings page logic
 
