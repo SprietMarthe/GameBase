@@ -1,7 +1,7 @@
 import streamlit as st
 from load_data import load_games
 
-def search_and_filter_games(games, search_term, difficulty=None, min_players=None, max_players=None):
+def search_and_filter_games(games, search_term, difficulty=None, min_players=None, max_players=None, drinking_only=False):
     filtered_games = games.copy()
 
     if search_term:
@@ -36,7 +36,15 @@ def search_and_filter_games(games, search_term, difficulty=None, min_players=Non
         filtered_games = [game for game in filtered_games 
                          if game.get('min_players', 0) <= max_players <= game.get('max_players', 999)]
 
+    if drinking_only:
+        filtered_games = [
+            game for game in filtered_games
+            if ("drink" in game.get('game_explanation', '').lower())
+            or game.get('drinking_rules', '').strip()
+        ]
+
     return filtered_games
+
 
 def view_games():
     """Display the games database with search and filtering options"""
@@ -65,6 +73,8 @@ def view_games():
         st.session_state.selected_difficulty = "All"
     if 'player_count' not in st.session_state:
         st.session_state.player_count = 4
+    if 'drinking_filter' not in st.session_state:
+        st.session_state.drinking_filter = False
 
     with st.container():
         st.subheader("Find Your Perfect Game")
@@ -90,6 +100,12 @@ def view_games():
             )
             st.session_state.selected_difficulty = selected_difficulty
 
+        st.checkbox(
+            "Only show drinking games",
+            value=st.session_state.drinking_filter,
+            key="drinking_filter"
+        )
+
         max_players_in_games = max(
             [game.get('max_players', 0) for game in all_games if isinstance(game.get('max_players'), (int, float))],
             default=12
@@ -109,6 +125,7 @@ def view_games():
             st.session_state.search_term = ""
             st.session_state.selected_difficulty = "All"
             st.session_state.player_count = 4
+            st.session_state.drinking_filter = False
             st.rerun()
 
     filtered_games = search_and_filter_games(
@@ -116,7 +133,8 @@ def view_games():
         st.session_state.search_term,
         st.session_state.selected_difficulty if st.session_state.selected_difficulty != "All" else None,
         st.session_state.player_count,
-        st.session_state.player_count
+        st.session_state.player_count,
+        st.session_state.drinking_filter
     )
 
     st.write(f"Found {len(filtered_games)} of {len(all_games)} games matching your criteria")
@@ -142,6 +160,7 @@ def view_games():
                         st.rerun()
     else:
         st.warning("No games found matching your search criteria.")
+
 
 def display_game_details(game):
     """Display detailed information about a selected game"""

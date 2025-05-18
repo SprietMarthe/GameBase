@@ -6,6 +6,8 @@ from pages.change_database.edit_game import edit_game
 from pages.change_database.add_user import add_user
 from pages.change_database.remove_user import remove_user
 from pages.change_database.view_login_attempts import view_login_attempts
+from pages.change_database.view_visits import view_visits
+
 
 
 def change_database():
@@ -39,7 +41,7 @@ def change_database():
             st.markdown("---")
             st.subheader("User Management")
 
-            col4, col5, col6 = st.columns(3)
+            col4, col5 = st.columns(2)
             with col4:
                 if st.button("Add User", use_container_width=True):
                     st.session_state.db_page = 'add_user'
@@ -48,12 +50,20 @@ def change_database():
                 if st.button("Remove User", use_container_width=True):
                     st.session_state.db_page = 'remove_user'
                     st.rerun()
+
+            # 📊 Analytics
+            st.markdown("---")
+            st.subheader("Analytics")
+
+            col6, col7 = st.columns(2)
             with col6:
                 if st.button("View Login Attempts", use_container_width=True):
                     st.session_state.db_page = 'view_login_attempts'
                     st.rerun()
-        else:
-            st.info("You do not have administrative rights to manage the database.")
+            with col7:
+                if st.button("View Visits", use_container_width=True):
+                    st.session_state.db_page = 'view_visits'
+                    st.rerun()
 
         # 🚪 Log out button (always visible)
         st.markdown("---")
@@ -80,3 +90,5 @@ def change_database():
         remove_user()
     elif st.session_state.db_page == 'view_login_attempts':
         view_login_attempts()
+    elif st.session_state.db_page == 'view_visits':
+        view_visits()

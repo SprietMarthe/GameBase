@@ -1,5 +1,7 @@
 import streamlit as st
 from firebase_config import get_firestore_db
+from datetime import datetime
+
 
 def view_login_attempts():
     st.subheader("Login Attempt Logs")
@@ -18,11 +20,21 @@ def view_login_attempts():
         data = []
         for doc in docs:
             record = doc.to_dict()
+
+            raw_timestamp = record.get("timestamp")
+            if raw_timestamp:
+                try:
+                    dt = datetime.fromisoformat(raw_timestamp)
+                    formatted_timestamp = dt.strftime("%d/%m/%Y %H:%M:%S")
+                except ValueError:
+                    formatted_timestamp = raw_timestamp  # fallback if parsing fails
+            else:
+                formatted_timestamp = "—"
+
             data.append({
-                "Timestamp": record.get("timestamp", "—"),
+                "Timestamp": formatted_timestamp,
                 "Username": record.get("username", "—"),
                 "Success": "✅" if record.get("success") else "❌",
-                "IP": record.get("ip", "unknown")
             })
 
         st.dataframe(data, use_container_width=True)

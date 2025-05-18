@@ -6,7 +6,7 @@ def add_user():
     st.subheader("Add New User")
 
     with st.form("add_user_form"):
-        username = st.text_input("Username*", help="Must be unique")
+        username = st.text_input("Username*", help="Must be unique").lower()
         password = st.text_input("Password*", type="password", help="Choose a strong password")
         is_admin = st.checkbox("Give admin user rights")
         submit = st.form_submit_button("Add User")

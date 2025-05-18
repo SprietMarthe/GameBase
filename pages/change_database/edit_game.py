@@ -69,9 +69,11 @@ def edit_game():
                 with col1:
                     new_min_players = st.number_input("Min Players", min_value=1, value=game.get('min_players', 1))
                 with col2:
-                    new_max_players = st.number_input("Max Players", min_value=new_min_players,
+                    new_max_players = st.number_input("Max Players", min_value=1,
                                                       value=max(game.get('max_players', 8), new_min_players))
-
+                if new_max_players < new_min_players:
+                    new_max_players = new_min_players
+                    
                 col1, col2 = st.columns(2)
                 with col1:
                     new_min_age = st.number_input("Minimum Age", min_value=0, value=game.get('min_age', 8))
@@ -84,7 +86,7 @@ def edit_game():
 
                 materials_list = game.get('materials', [])
                 if isinstance(materials_list, str):
-                    materials_list = [item.strip().upper() for item in materials_list.split(',') if item.strip()]
+                    materials_list = [item.strip().title() for item in materials_list.split(',') if item.strip()]
                 if game.get('game_type') == "Card Game" and "deck of cards" not in [m.lower() for m in materials_list]:
                     materials_list.append("deck of cards")
                 materials_default = ', '.join(materials_list)

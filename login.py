@@ -1,6 +1,7 @@
 import streamlit as st
 import bcrypt
 from firebase_config import get_firestore_db
+from google.cloud.firestore_v1 import FieldFilter
 from datetime import datetime, timezone
 datetime.now(timezone.utc).isoformat()
 
@@ -21,7 +22,7 @@ def check_login():
     button_placeholder = st.empty()
 
     # Inputs
-    username = username_placeholder.text_input("Username", "")
+    username = username_placeholder.text_input("Username", "").lower()
     password = password_placeholder.text_input("Password", "", type="password")
     login_button = button_placeholder.button("Login")
 
@@ -50,6 +51,7 @@ def check_login():
                 button_placeholder.empty()
 
                 log_login_attempt(username, success=True)
+                update_visit_log_after_login()
 
                 return True
             else:
@@ -65,11 +67,57 @@ def check_login():
 def log_login_attempt(username, success):
     try:
         db = get_firestore_db()
+        session_id = st.session_state.get("anonymous_id", "unknown")
+        today_str = datetime.now(timezone.utc).date().isoformat()
+
         attempts_ref = db.collection("login_attempts")
+
+        # Look for existing attempt for this session today
+        existing_logs = attempts_ref \
+            .where(filter=FieldFilter("session_id", "==", session_id)) \
+            .where(filter=FieldFilter("date", "==", today_str)) \
+            .limit(1) \
+            .stream()
+
+        for doc in existing_logs:
+            doc.reference.update({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "username": username,
+                "success": success,
+                "tries": doc.to_dict().get("tries", 1) + 1
+            })
+            return
+
+        # If not found, create new log entry
         attempts_ref.add({
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "username": username,
             "success": success,
+            "session_id": session_id,
+            "date": today_str,
+            "tries": 1
         })
+
     except Exception as e:
         st.warning(f"Could not log login attempt: {e}")
+
+
+        
+
+def update_visit_log_after_login():
+    db = get_firestore_db()
+    session_id = st.session_state.get("anonymous_id", "unknown")
+    today_str = datetime.now(timezone.utc).date().isoformat()
+
+    logs = db.collection("visit_logs") \
+        .where(filter=FieldFilter("session_id", "==", session_id)) \
+        .where(filter=FieldFilter("date", "==", today_str)) \
+        .limit(1) \
+        .stream()
+
+    for doc in logs:
+        doc.reference.update({
+            "username": st.session_state.get("username", "unknown"),
+            "is_admin": st.session_state.get("admin_user_rights", False)
+        })
+        break  # Only update the first match
