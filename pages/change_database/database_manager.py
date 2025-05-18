@@ -8,35 +8,34 @@ from pages.change_database.remove_user import remove_user
 from pages.change_database.view_login_attempts import view_login_attempts
 
 
-
 def change_database():
     """CRUD Page for managing games (Add, Edit, Delete) and users"""
 
-    # Initialize state if needed
     if 'db_page' not in st.session_state:
         st.session_state.db_page = 'main'
 
     if st.session_state.db_page == 'main':
         st.subheader("Database Management")
-        st.write("Select an action to manage your games or users.")
 
-        # 🎮 Game management buttons (first row)
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Add Game", use_container_width=True):
-                st.session_state.db_page = 'add'
-                st.rerun()
-        with col2:
-            if st.button("Edit Game", use_container_width=True):
-                st.session_state.db_page = 'edit'
-                st.rerun()
-        with col3:
-            if st.button("Delete Game", use_container_width=True):
-                st.session_state.db_page = 'delete'
-                st.rerun()
-
-        # 👤 User management buttons (second row)
         if st.session_state.get("admin_user_rights", False):
+            st.write("Select an action to manage your games or users.")
+
+            # 🎮 Game management buttons
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                if st.button("Add Game", use_container_width=True):
+                    st.session_state.db_page = 'add'
+                    st.rerun()
+            with col2:
+                if st.button("Edit Game", use_container_width=True):
+                    st.session_state.db_page = 'edit'
+                    st.rerun()
+            with col3:
+                if st.button("Delete Game", use_container_width=True):
+                    st.session_state.db_page = 'delete'
+                    st.rerun()
+
+            # 👤 User management buttons
             st.markdown("---")
             st.subheader("User Management")
 
@@ -53,7 +52,15 @@ def change_database():
                 if st.button("View Login Attempts", use_container_width=True):
                     st.session_state.db_page = 'view_login_attempts'
                     st.rerun()
+        else:
+            st.info("You do not have administrative rights to manage the database.")
 
+        # 🚪 Log out button (always visible)
+        st.markdown("---")
+        if st.button("🔒 Log Out", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
 
     else:
         if st.button("← Back to Database Menu"):
