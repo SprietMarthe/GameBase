@@ -40,7 +40,7 @@ def search_and_filter_games(games, search_term, difficulty=None, min_players=Non
 
 def view_games():
     """Display the games database with search and filtering options"""
-    st.title("Games Database")
+    st.title("Game Database")
 
     if "view_mode" not in st.session_state:
         st.session_state.view_mode = "list"

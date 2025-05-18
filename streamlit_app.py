@@ -5,8 +5,10 @@ from pages.settings import settings  # Import settings page (for adding/updating
 from pages.about import about  # Import about page
 from utils.helpers import custom_header
 
+
 # Page configuration
 st.set_page_config(page_title="GameBase", page_icon="🎮", layout="wide")
+
 
 # Initialize the session state for page navigation
 if 'current_page' not in st.session_state:
