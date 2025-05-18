@@ -28,7 +28,7 @@ def check_login():
 
     if login_button:
         try:
-            docs = users_ref.where("username", "==", username).limit(1).stream()
+            docs = users_ref.where(filter=FieldFilter("username", "==", username)).limit(1).stream()
             user_doc = next(docs, None)
 
             if not user_doc:
@@ -102,7 +102,7 @@ def log_login_attempt(username, success):
         st.warning(f"Could not log login attempt: {e}")
 
 
-        
+
 
 def update_visit_log_after_login():
     db = get_firestore_db()

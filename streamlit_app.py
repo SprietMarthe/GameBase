@@ -1,8 +1,8 @@
 import streamlit as st
-from login import check_login  # Import the login function
-from pages.view_games import view_games  # Import view games page
-from pages.settings import settings  # Import settings page (for adding/updating games)
-from pages.about import about  # Import about page
+from pages.view_games import view_games  
+from pages.settings import settings
+from pages.about import about  
+from pages.contact import contact 
 from utils.helpers import custom_header
 from firebase_config import get_firestore_db
 from datetime import datetime, timezone
@@ -59,8 +59,8 @@ with col2:
     # Use the session state to remember the current page
     menu = st.selectbox(
         "More", 
-        options=["View Games", "Settings", "About"], 
-        index=["View Games", "Settings", "About"].index(st.session_state.current_page),
+        options=["View Games", "Settings", "About", "Contact"], 
+        index=["View Games", "Settings", "About", "Contact"].index(st.session_state.current_page),
         key="more_menu"
     )
     
@@ -78,3 +78,6 @@ elif menu == "About":
 
 elif menu == "View Games":
     view_games()  # Call the view games page logic
+
+elif menu == "Contact":
+    contact()
