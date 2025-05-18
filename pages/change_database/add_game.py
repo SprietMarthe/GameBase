@@ -50,6 +50,14 @@ def add_game():
         example = st.text_area("Example", 
                              help="A brief example of gameplay")
         
+        # Determine if the form is incomplete
+        required_fields = [game_name, game_type, game_explanation]
+        auto_flag = not all(required_fields)
+
+        # Let user override the flag (default based on missing required fields)
+        manual_flag = st.checkbox("Mark this game as incomplete (to finish later)", value=auto_flag)
+
+        
         # Optional fields
         expander = st.expander("Additional Options")
         with expander:
@@ -58,53 +66,50 @@ def add_game():
             drinking_rules = st.text_area("Drinking Rules (optional)", 
                                         help="Optional rules for adult drinking games")
         
+
         # Submit button
         submitted = st.form_submit_button("Add Game")
         
         if submitted:
-            # Basic validation
-            if not game_name or not game_type or not game_explanation:
-                st.session_state.add_status = "error_validation"
-                st.session_state.validation_message = "Please fill in all required fields (marked with *)."
-            else:
-                try:
-                    # Prepare game data
-                    new_game = {
-                        'game_name': game_name,
-                        'game_type': game_type,
-                        'difficulty': difficulty,
-                        'min_players': min_players,
-                        'max_players': max_players,
-                        'min_age': min_age,
-                        'min_duration': min_duration,
-                        'materials': [item.strip() for item in materials.split(',') if item.strip()],
-                        'game_explanation': game_explanation,
-                        'rules': rules,
-                        'score_calculation': score_calculation,
-                        'example': example,
-                        'expansions': [item.strip() for item in expansions.split(',') if item.strip()],
-                        'drinking_rules': drinking_rules,
-                        'image_path': ""  # Empty for now, could be added later
-                    }
-                    
-                    # Get Firestore database
-                    db = get_firestore_db()
-                    games_ref = db.collection("games")
-                    
-                    # Check if a game with this name already exists
-                    existing_games = list(games_ref.where("game_name", "==", game_name).limit(1).stream())
-                    if existing_games:
-                        st.session_state.add_status = "error_duplicate"
-                        st.session_state.duplicate_game = game_name
-                    else:
-                        # Add the new game
-                        games_ref.add(new_game)
-                        st.session_state.add_status = "success"
-                        st.session_state.added_game_name = game_name
+            try:
+                # Prepare game data
+                new_game = {
+                    'game_name': game_name,
+                    'game_type': game_type,
+                    'difficulty': difficulty,
+                    'min_players': min_players,
+                    'max_players': max_players,
+                    'min_age': min_age,
+                    'min_duration': min_duration,
+                    'materials': [item.strip() for item in materials.split(',') if item.strip()],
+                    'game_explanation': game_explanation,
+                    'rules': rules,
+                    'score_calculation': score_calculation,
+                    'example': example,
+                    'expansions': [item.strip() for item in expansions.split(',') if item.strip()],
+                    'drinking_rules': drinking_rules,
+                    'to_be_updated': manual_flag,
+                    'image_path': ""  # Empty for now, could be added later
+                }
                 
-                except Exception as e:
-                    st.session_state.add_status = "error"
-                    st.session_state.add_error = str(e)
+                # Get Firestore database
+                db = get_firestore_db()
+                games_ref = db.collection("games")
+                
+                # Check if a game with this name already exists
+                existing_games = list(games_ref.where("game_name", "==", game_name).limit(1).stream())
+                if existing_games:
+                    st.session_state.add_status = "error_duplicate"
+                    st.session_state.duplicate_game = game_name
+                else:
+                    # Add the new game
+                    games_ref.add(new_game)
+                    st.session_state.add_status = "success"
+                    st.session_state.added_game_name = game_name
+            
+            except Exception as e:
+                st.session_state.add_status = "error"
+                st.session_state.add_error = str(e)
     
     # Display status messages based on session state
     if st.session_state.add_status == "success":

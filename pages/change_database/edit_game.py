@@ -1,4 +1,5 @@
 import streamlit as st
+from game_types import load_game_types
 from load_data import load_games
 from firebase_config import get_firestore_db
 
@@ -15,6 +16,9 @@ def edit_game():
     
     # Load games to select which one to edit
     games = load_games()
+
+    # Optionally sort incomplete ones first
+    games = sorted(games, key=lambda g: g.get('to_be_updated', False), reverse=True)
     
     if not games:
         st.error("No games available to edit.")
@@ -115,6 +119,11 @@ def edit_game():
                 new_score_calculation = st.text_area("Score Calculation", game.get('score_calculation', ''))
                 new_example = st.text_area("Example", game.get('example', ''))
                 
+
+                # Add checkbox to indicate if game still needs updates
+                incomplete_flag = game.get('to_be_updated', False)
+                new_to_be_updated = st.checkbox("Mark this game as incomplete", value=incomplete_flag)
+
                 # Optional fields
                 expander = st.expander("Additional Options")
                 with expander:
@@ -142,7 +151,9 @@ def edit_game():
                             'score_calculation': new_score_calculation,
                             'example': new_example,
                             'expansions': [item.strip() for item in new_expansions.split(',') if item.strip()],
-                            'drinking_rules': new_drinking_rules
+                            'drinking_rules': new_drinking_rules,
+                            'to_be_updated': new_to_be_updated
+
                         }
                         
                         # Get Firestore database
