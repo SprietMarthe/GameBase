@@ -1,6 +1,9 @@
 import streamlit as st
 import bcrypt
 from firebase_config import get_firestore_db
+from datetime import datetime, timezone
+datetime.now(timezone.utc).isoformat()
+
 
 def check_login():
     """Check if the user is logged in using Firestore + bcrypt, with UI placeholders."""
@@ -28,6 +31,7 @@ def check_login():
             user_doc = next(docs, None)
 
             if not user_doc:
+                log_login_attempt(username, success=False)
                 st.error("Invalid username or password.")
                 return False
 
@@ -45,10 +49,27 @@ def check_login():
                 password_placeholder.empty()
                 button_placeholder.empty()
 
+                log_login_attempt(username, success=True)
+
                 return True
             else:
+                log_login_attempt(username, success=False)
                 st.error("Invalid username or password.")
         except Exception as e:
             st.error(f"Login failed: {e}")
 
     return False
+
+
+
+def log_login_attempt(username, success):
+    try:
+        db = get_firestore_db()
+        attempts_ref = db.collection("login_attempts")
+        attempts_ref.add({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "username": username,
+            "success": success,
+        })
+    except Exception as e:
+        st.warning(f"Could not log login attempt: {e}")
