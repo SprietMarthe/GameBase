@@ -84,7 +84,7 @@ def edit_game():
 
                 materials_list = game.get('materials', [])
                 if isinstance(materials_list, str):
-                    materials_list = [item.strip() for item in materials_list.split(',') if item.strip()]
+                    materials_list = [item.strip().upper() for item in materials_list.split(',') if item.strip()]
                 if game.get('game_type') == "Card Game" and "deck of cards" not in [m.lower() for m in materials_list]:
                     materials_list.append("deck of cards")
                 materials_default = ', '.join(materials_list)

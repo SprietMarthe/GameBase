@@ -55,13 +55,13 @@ def add_game():
         )
         
         # Game details
-        game_explanation = st.text_area("Game Explanation*", 
+        game_explanation = st.text_area("Game Explanation*",
                                       help="Brief description of what the game is about")
-        rules = st.text_area("Rules", 
+        rules = st.text_area("Rules", height=150,
                            help="Step-by-step explanation of how to play")
-        score_calculation = st.text_area("Score Calculation", 
+        score_calculation = st.text_area("Score Calculation", height=120,
                                        help="How points are earned and winners determined")
-        example = st.text_area("Example", 
+        example = st.text_area("Example", height=150,
                              help="A brief example of gameplay")
         
         # Determine if the form is incomplete
@@ -75,9 +75,9 @@ def add_game():
         # Optional fields
         expander = st.expander("Additional Options")
         with expander:
-            expansions = st.text_area("Expansions (comma separated)", 
+            expansions = st.text_area("Expansions (comma separated)", height=120,
                                      help="Optional expansions for the game")
-            drinking_rules = st.text_area("Drinking Rules (optional)", 
+            drinking_rules = st.text_area("Drinking Rules (optional)", height=120,
                                         help="Optional rules for adult drinking games")
         
 
@@ -95,12 +95,12 @@ def add_game():
                     'max_players': max_players,
                     'min_age': min_age,
                     'min_duration': min_duration,
-                    'materials': [item.strip() for item in materials.split(',') if item.strip()],
+                    'materials': [item.strip().upper() for item in materials.split(',') if item.strip()],
                     'game_explanation': game_explanation,
                     'rules': rules,
                     'score_calculation': score_calculation,
                     'example': example,
-                    'expansions': [item.strip() for item in expansions.split(',') if item.strip()],
+                    'expansions': [item.strip().upper() for item in expansions.split(',') if item.strip()],
                     'drinking_rules': drinking_rules,
                     'to_be_updated': manual_flag,
                     "created_at": datetime.now(timezone.utc).isoformat(),

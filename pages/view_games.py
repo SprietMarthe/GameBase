@@ -132,7 +132,7 @@ def view_games():
                     col1, col2 = st.columns(2)
                     with col1:
                         st.write(f"**Players:** {game.get('min_players', '-')} - {game.get('max_players', '-')}")
-                        st.write(f"**Duration:** {game.get('min_duration', '-')} min")
+                        st.write(f"{game.get('min_duration', '-')} min")
                     with col2:
                         st.write(f"**Difficulty:** {game.get('difficulty', 'Not specified')}")
 
