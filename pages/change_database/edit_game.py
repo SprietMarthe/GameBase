@@ -163,8 +163,13 @@ def edit_game():
                             break
 
                         if doc_found:
+                            updated_games = load_games()
+                            st.session_state.edit_game_selected = new_game_name
+                            st.session_state.games_cache = updated_games  # optional: cache
+
                             st.session_state.edit_status = "success"
                             st.session_state.edited_game_name = new_game_name
+                            st.rerun()  # force rerender to load fresh data
                         else:
                             st.session_state.edit_status = "error_not_found"
 
