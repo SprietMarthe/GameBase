@@ -5,6 +5,8 @@ from pages.change_database.delete_game import delete_game
 from pages.change_database.edit_game import edit_game
 from pages.change_database.add_user import add_user
 from pages.change_database.remove_user import remove_user
+from pages.change_database.view_login_attempts import view_login_attempts
+
 
 
 def change_database():
@@ -37,7 +39,8 @@ def change_database():
         if st.session_state.get("admin_user_rights", False):
             st.markdown("---")
             st.subheader("User Management")
-            col4, col5 = st.columns(2)
+
+            col4, col5, col6 = st.columns(3)
             with col4:
                 if st.button("Add User", use_container_width=True):
                     st.session_state.db_page = 'add_user'
@@ -45,6 +48,10 @@ def change_database():
             with col5:
                 if st.button("Remove User", use_container_width=True):
                     st.session_state.db_page = 'remove_user'
+                    st.rerun()
+            with col6:
+                if st.button("View Login Attempts", use_container_width=True):
+                    st.session_state.db_page = 'view_login_attempts'
                     st.rerun()
 
 
@@ -64,3 +71,5 @@ def change_database():
         add_user()
     elif st.session_state.db_page == 'remove_user':
         remove_user()
+    elif st.session_state.db_page == 'view_login_attempts':
+        view_login_attempts()

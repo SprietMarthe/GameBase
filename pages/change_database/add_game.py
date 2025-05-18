@@ -1,6 +1,8 @@
 import streamlit as st
 from firebase_config import get_firestore_db
 from game_types import load_game_types
+from datetime import datetime, timezone
+
 
 def add_game():
     """Form for adding a new game to the database"""
@@ -101,6 +103,8 @@ def add_game():
                     'expansions': [item.strip() for item in expansions.split(',') if item.strip()],
                     'drinking_rules': drinking_rules,
                     'to_be_updated': manual_flag,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_by": st.session_state.get("username", "unknown"),
                     'image_path': ""  # Empty for now, could be added later
                 }
                 
