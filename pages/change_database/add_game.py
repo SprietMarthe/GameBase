@@ -34,11 +34,23 @@ def add_game():
         with col1:
             min_age = st.number_input("Minimum Age*", min_value=0, value=8)
         with col2:
-            min_duration = st.number_input("Duration (minutes)*", min_value=1, value=30)
+            min_duration = st.number_input(
+                "Duration (minutes)*",
+                min_value=15,
+                max_value=480,
+                step=15,
+                value=30,
+                help="Use 15-minute steps"
+            )
         
         # Materials
-        materials = st.text_area("Materials* (comma separated)", 
-                               help="List materials needed, separated by commas")
+        # Automatically suggest "deck of cards" if "Card Game" is selected
+        default_materials = "deck of cards" if game_type == "Card Game" else ""
+        materials = st.text_area(
+            "Materials* (comma separated)",
+            value=default_materials,
+            help="List materials needed, separated by commas"
+        )
         
         # Game details
         game_explanation = st.text_area("Game Explanation*", 

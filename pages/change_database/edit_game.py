@@ -105,12 +105,25 @@ def edit_game():
                                                 min_value=0, 
                                                 value=game.get('min_age', 8))
                 with col2:
-                    new_min_duration = st.number_input("Duration (minutes)", 
-                                                    min_value=1, 
-                                                    value=game.get('min_duration', 30))
+                    new_min_duration = st.number_input(
+                        "Duration (minutes)",
+                        min_value=15,
+                        max_value=480,
+                        step=15,
+                        value=max(15, game.get('min_duration', 30)),
+                        help="Use 15-minute increments"
+                    )
                 
                 # Materials (as a comma-separated string)
-                materials_default = ', '.join(game.get('materials', [])) if isinstance(game.get('materials'), list) else game.get('materials', '')
+                materials_list = game.get('materials', [])
+                if isinstance(materials_list, str):
+                    materials_list = [item.strip() for item in materials_list.split(',') if item.strip()]
+
+                # Add "deck of cards" if game type is Card Game and it's not already listed
+                if game.get('game_type') == "Card Game" and "deck of cards" not in [m.lower() for m in materials_list]:
+                    materials_list.append("deck of cards")
+
+                materials_default = ', '.join(materials_list)
                 new_materials = st.text_area("Materials (comma separated)", materials_default)
                 
                 # Game details
